@@ -17,8 +17,3 @@ test/dummy_rails/log/*.log
 test/dummy_rails/public/assets/
 .DS_Store
 node_modules
-Vagrantfile
-/box/
-/drupal-vm/
-/vendor/
-/.idea/

@@ -1,0 +1,5 @@
+Vagrantfile
+/box/
+/drupal-vm/
+/vendor/
+/.idea/
