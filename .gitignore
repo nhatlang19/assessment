@@ -3,3 +3,4 @@ Vagrantfile
 /drupal-vm/
 /vendor/
 /.idea/
+.vagrant
