@@ -1,0 +1,14 @@
+table tr td.raw {
+    border: 1px solid #AAAAAA;
+}
+table .descrription {
+    display: none;
+}
+
+table tr td.raw .left {
+    float: left;
+}
+
+table tr td.raw .right {
+  float: right;
+}

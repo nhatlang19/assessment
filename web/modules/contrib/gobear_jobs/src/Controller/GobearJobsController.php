@@ -10,7 +10,7 @@ class GobearJobsController
         $request = $client->get('https://jobs.github.com/positions.json?location=new+york');
         $items = json_decode($request->getBody());
 
-        $headers = ['Title', 'Company', 'Location', 'Type', 'Created at', 'Description'];
+        $headers = ['Title', 'Company', 'Location', 'Type', 'Created at'];
 
         return [
             '#theme' => 'jobs_list',

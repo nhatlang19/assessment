@@ -7,12 +7,20 @@
     <tbody>
         {% for job in items %}
         <tr>
-            <td>{{ job.title }}</td>
-            <td>{{ job.company }}</td>
-            <td>{{ job.location }}</td>
-            <td>{{ job.type }}</td>
-            <td>{{ job.created_at }}</td>
-            <td>{{ job.description }}</td>
+            <td>
+                <div class="raw">
+                    <div class="left">
+                         <h3>{{ job.title }}</h3>
+                         <div>@{{ job.company }} | {{ job.location }} </div>
+                         <div>Published {{ job.created_at }} | Tech team</div>
+                         <div><a href="#" class="more">More info ></a></div>
+                         <div class="descrription">{{ job.description }}</div>
+                    </div>
+                    <div class="right">
+                        {{ job.type }}
+                    </div>
+                </div>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
