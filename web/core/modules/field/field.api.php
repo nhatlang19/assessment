@@ -43,7 +43,6 @@
  * @see plugin_api
  */
 
-
 /**
  * Perform alterations on Field API field types.
  *
@@ -54,7 +53,7 @@
 function hook_field_info_alter(&$info) {
   // Change the default widget for fields of type 'foo'.
   if (isset($info['foo'])) {
-    $info['foo']['default widget'] = 'mymodule_widget';
+    $info['foo']['default_widget'] = 'mymodule_widget';
   }
 }
 
@@ -112,7 +111,7 @@ function hook_field_storage_config_update_forbid(\Drupal\field\FieldStorageConfi
     $prior_allowed_values = $prior_field_storage->getSetting('allowed_values');
     $lost_keys = array_keys(array_diff_key($prior_allowed_values, $allowed_values));
     if (_options_values_in_use($field_storage->getTargetEntityTypeId(), $field_storage->getName(), $lost_keys)) {
-      throw new \Drupal\Core\Entity\Exception\FieldStorageDefinitionUpdateForbiddenException(t('A list field (@field_name) with existing data cannot have its keys changed.', ['@field_name' => $field_storage->getName()]));
+      throw new \Drupal\Core\Entity\Exception\FieldStorageDefinitionUpdateForbiddenException("A list field '{$field_storage->getName()}' with existing data cannot have its keys changed.");
     }
   }
 }
@@ -293,7 +292,7 @@ function hook_field_widget_multivalue_WIDGET_TYPE_form_alter(array &$elements, \
   // Code here will only act on widgets of type WIDGET_TYPE. For example,
   // hook_field_widget_multivalue_mymodule_autocomplete_form_alter() will only
   // act on widgets of type 'mymodule_autocomplete'.
-  // Change the autcomplete route for each autocomplete element within the
+  // Change the autocomplete route for each autocomplete element within the
   // multivalue widget.
   foreach (Element::children($elements) as $delta => $element) {
     $elements[$delta]['#autocomplete_route_name'] = 'mymodule.autocomplete_route';
@@ -394,7 +393,7 @@ function hook_field_info_max_weight($entity_type, $bundle, $context, $context_mo
  *   The field storage being purged.
  */
 function hook_field_purge_field_storage(\Drupal\field\Entity\FieldStorageConfig $field_storage) {
-  db_delete('my_module_field_storage_info')
+  \Drupal::database()->delete('my_module_field_storage_info')
     ->condition('uuid', $field_storage->uuid())
     ->execute();
 }
@@ -411,7 +410,7 @@ function hook_field_purge_field_storage(\Drupal\field\Entity\FieldStorageConfig 
  *   The field being purged.
  */
 function hook_field_purge_field(\Drupal\field\Entity\FieldConfig $field) {
-  db_delete('my_module_field_info')
+  \Drupal::database()->delete('my_module_field_info')
     ->condition('id', $field->id())
     ->execute();
 }

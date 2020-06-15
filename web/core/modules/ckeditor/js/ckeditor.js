@@ -15,7 +15,9 @@
       };
 
       var label = $('label[for=' + element.getAttribute('id') + ']').html();
-      format.editorSettings.title = Drupal.t('Rich Text Editor, !label field', { '!label': label });
+      format.editorSettings.title = Drupal.t('Rich Text Editor, !label field', {
+        '!label': label
+      });
 
       return !!CKEDITOR.replace(element, format.editorSettings);
     },
@@ -177,19 +179,21 @@
   });
 
   function redirectTextareaFragmentToCKEditorInstance() {
-    var hash = location.hash.substr(1);
+    var hash = window.location.hash.substr(1);
     var element = document.getElementById(hash);
     if (element) {
       var editor = CKEDITOR.dom.element.get(element).getEditor();
       if (editor) {
         var id = editor.container.getAttribute('id');
-        location.replace('#' + id);
+        window.location.replace('#' + id);
       }
     }
   }
   $(window).on('hashchange.ckeditor', redirectTextareaFragmentToCKEditorInstance);
 
   CKEDITOR.config.autoGrow_onStartup = true;
+
+  CKEDITOR.config.autoGrow_maxHeight = 0.7 * window.innerHeight;
 
   CKEDITOR.timestamp = drupalSettings.ckeditor.timestamp;
 

@@ -18,12 +18,13 @@ class ContextualController implements ContainerInjectionInterface {
 
   /**
    * The renderer.
+   *
    * @var \Drupal\Core\Render\RendererInterface
    */
-  protected $render;
+  protected $renderer;
 
   /**
-   * Constructors a new ContextualController
+   * Constructors a new ContextualController.
    *
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
@@ -47,25 +48,31 @@ class ContextualController implements ContainerInjectionInterface {
    * Given a list of contextual links IDs, render them. Hence this must be
    * robust to handle arbitrary input.
    *
-   * @see contextual_preprocess()
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The Symfony request object.
    *
    * @return \Symfony\Component\HttpFoundation\JsonResponse
    *   The JSON response.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+   *   Thrown when the request contains no ids.
+   *
+   * @see contextual_preprocess()
    */
   public function render(Request $request) {
     $ids = $request->request->get('ids');
     if (!isset($ids)) {
-      throw new BadRequestHttpException(t('No contextual ids specified.'));
+      throw new BadRequestHttpException('No contextual ids specified.');
     }
 
     $tokens = $request->request->get('tokens');
     if (!isset($tokens)) {
-      throw new BadRequestHttpException(t('No contextual ID tokens specified.'));
+      throw new BadRequestHttpException('No contextual ID tokens specified.');
     }
 
     $rendered = [];
     foreach ($ids as $key => $id) {
-      if (!isset($tokens[$key]) || !Crypt::hashEquals($tokens[$key], Crypt::hmacBase64($id, Settings::getHashSalt() . \Drupal::service('private_key')->get()))) {
+      if (!isset($tokens[$key]) || !hash_equals($tokens[$key], Crypt::hmacBase64($id, Settings::getHashSalt() . \Drupal::service('private_key')->get()))) {
         throw new BadRequestHttpException('Invalid contextual ID specified.');
       }
       $element = [

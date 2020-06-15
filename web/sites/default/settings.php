@@ -261,7 +261,7 @@ $databases['default']['default'] = array(
  * @endcode
  */
 $config_directories = array();
-
+$config['system.logging']['error_level'] = 'verbose';
 /**
  * Settings:
  *
@@ -306,7 +306,7 @@ $config_directories = array();
  *   $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  * @endcode
  */
-$settings['hash_salt'] = '23PXhyH5URGnFk0nlgBLB-KiXRKfsgqkvwnbgDZWiCEmM-dNfIVV0ykAoZnwlD-ygGcrwOa4gQ';
+$settings['hash_salt'] = '9ec4a25884fa0349d1593c19dd19bfb82bb4c230';
 
 /**
  * Deployment identifier.
@@ -667,7 +667,7 @@ if ($settings['hash_salt']) {
 # $config['system.site']['name'] = 'My Drupal site';
 # $config['system.theme']['default'] = 'stark';
 # $config['user.settings']['anonymous'] = 'Visitor';
-
+$config['system.logging']['error_level'] = 'verbose';
 /**
  * Fast 404 pages:
  *
@@ -795,14 +795,3 @@ $settings['entity_update_batch_size'] = 50;
 #   include $app_root . '/' . $site_path . '/settings.local.php';
 # }
 $config_directories['sync'] = '../config/sync';
-$databases['default']['default'] = array (
-  'database' => 'gobear',
-  'username' => 'root',
-  'password' => '',
-  'prefix' => '',
-  'host' => 'localhost',
-  'port' => '3306',
-  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-  'driver' => 'mysql',
-);
-$settings['install_profile'] = 'standard';

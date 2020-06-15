@@ -2,6 +2,7 @@
 
 namespace Drupal\migrate\Plugin;
 
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\migrate\Exception\RequirementsException;
@@ -216,7 +217,7 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
   protected $sourcePluginManager;
 
   /**
-   * Thep process plugin manager.
+   * The process plugin manager.
    *
    * @var \Drupal\migrate\Plugin\MigratePluginManager
    */
@@ -277,7 +278,7 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
     $this->destinationPluginManager = $destination_plugin_manager;
     $this->idMapPluginManager = $idmap_plugin_manager;
 
-    foreach (NestedArray::mergeDeep($plugin_definition, $configuration) as $key => $value) {
+    foreach (NestedArray::mergeDeepArray([$plugin_definition, $configuration], TRUE) as $key => $value) {
       $this->$key = $value;
     }
   }
@@ -321,12 +322,13 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
    * @return mixed
    *   The value for that property, or NULL if the property does not exist.
    *
-   * @deprecated in Drupal 8.1.x, will be removed before Drupal 9.0.x. Use
+   * @deprecated in drupal:8.1.0 and is removed from drupal:9.0.0. Use
    *   more specific getters instead.
    *
    * @see https://www.drupal.org/node/2873795
    */
   public function get($property) {
+    @trigger_error('\Drupal\migrate\Plugin\Migration::get() is deprecated in Drupal 8.1.x, will be removed before Drupal 9.0.x. Use more specific getters instead. See https://www.drupal.org/node/2873795', E_USER_DEPRECATED);
     return isset($this->$property) ? $this->$property : NULL;
   }
 
@@ -362,6 +364,9 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
       $this->processPlugins[$index] = [];
       foreach ($this->getProcessNormalized($process) as $property => $configurations) {
         $this->processPlugins[$index][$property] = [];
+        if (!is_array($configurations) && !$this->processPlugins[$index][$property]) {
+          throw new MigrateException(sprintf("Process configuration for '$property' must be an array", $property));
+        }
         foreach ($configurations as $configuration) {
           if (isset($configuration['source'])) {
             $this->processPlugins[$index][$property][] = $this->processPluginManager->createInstance('get', $configuration, $this);
@@ -400,6 +405,10 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
       if (isset($configuration['plugin'])) {
         $configuration = [$configuration];
       }
+      if (!is_array($configuration)) {
+        $migration_id = $this->getPluginId();
+        throw new MigrateException("Invalid process for destination '$destination' in migration '$migration_id'");
+      }
       $normalized_configurations[$destination] = $configuration;
     }
     return $normalized_configurations;
@@ -410,7 +419,7 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
    */
   public function getDestinationPlugin($stub_being_requested = FALSE) {
     if ($stub_being_requested && !empty($this->destination['no_stub'])) {
-      throw new MigrateSkipRowException();
+      throw new MigrateSkipRowException('Stub requested but not made because no_stub configuration is set.');
     }
     if (!isset($this->destinationPlugin)) {
       $this->destinationPlugin = $this->destinationPluginManager->createInstance($this->destination['plugin'], $this->destination, $this);
@@ -554,7 +563,6 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
     return $this;
   }
 
-
   /**
    * {@inheritdoc}
    */
@@ -615,6 +623,9 @@ class Migration extends PluginBase implements MigrationInterface, RequirementsIn
    */
   public function getMigrationDependencies() {
     $this->migration_dependencies = ($this->migration_dependencies ?: []) + ['required' => [], 'optional' => []];
+    if (count($this->migration_dependencies) !== 2 || !is_array($this->migration_dependencies['required']) || !is_array($this->migration_dependencies['optional'])) {
+      throw new InvalidPluginDefinitionException($this->id(), "Invalid migration dependencies configuration for migration {$this->id()}");
+    }
     $this->migration_dependencies['optional'] = array_unique(array_merge($this->migration_dependencies['optional'], $this->findMigrationDependencies($this->process)));
     return $this->migration_dependencies;
   }

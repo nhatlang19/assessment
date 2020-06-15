@@ -23,6 +23,11 @@ class ConfigAccessTest extends SettingsTrayTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -51,6 +56,7 @@ class ConfigAccessTest extends SettingsTrayTestBase {
     // permission.
     $web_assert->fieldNotExists('settings[site_information][site_name]');
     $page->pressButton('Save Site branding');
+    $this->waitForOffCanvasToClose();
     $this->assertElementVisibleAfterWait('css', 'div:contains(The block configuration has been saved)');
     $web_assert->assertWaitOnAjaxRequest();
     // Confirm we did not save changes to the configuration.

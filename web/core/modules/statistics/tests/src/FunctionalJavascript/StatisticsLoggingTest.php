@@ -3,7 +3,7 @@
 namespace Drupal\Tests\statistics\FunctionalJavascript;
 
 use Drupal\Core\Session\AccountInterface;
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
 use Drupal\user\Entity\Role;
 
@@ -12,12 +12,17 @@ use Drupal\user\Entity\Role;
  *
  * @group system
  */
-class StatisticsLoggingTest extends JavascriptTestBase {
+class StatisticsLoggingTest extends WebDriverTestBase {
 
   /**
    * {@inheritdoc}
    */
   public static $modules = ['node', 'statistics', 'language'];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'classy';
 
   /**
    * Node for tests.

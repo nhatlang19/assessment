@@ -38,6 +38,7 @@ abstract class FeedResourceTestBase extends EntityResourceTestBase {
       case 'GET':
         $this->grantPermissionsToTestedRole(['access news feeds']);
         break;
+
       case 'POST':
       case 'PATCH':
       case 'DELETE':
@@ -76,33 +77,33 @@ abstract class FeedResourceTestBase extends EntityResourceTestBase {
     return [
       'uuid' => [
         [
-          'value' => 'abcdefg'
-        ]
+          'value' => 'abcdefg',
+        ],
       ],
       'fid' => [
         [
-          'value' => 1
-        ]
+          'value' => 1,
+        ],
       ],
       'langcode' => [
         [
-          'value' => 'en'
-        ]
+          'value' => 'en',
+        ],
       ],
       'url' => [
         [
-          'value' => 'http://example.com/rss.xml'
-        ]
+          'value' => 'http://example.com/rss.xml',
+        ],
       ],
       'title' => [
         [
-          'value' => 'Feed'
-        ]
+          'value' => 'Feed',
+        ],
       ],
       'refresh' => [
         [
-          'value' => 900
-        ]
+          'value' => 900,
+        ],
       ],
       'checked' => [
         $this->formatExpectedTimestampItemValues(123456789),
@@ -112,28 +113,28 @@ abstract class FeedResourceTestBase extends EntityResourceTestBase {
       ],
       'link' => [
         [
-          'value' => 'http://example.com'
-        ]
+          'value' => 'http://example.com',
+        ],
       ],
       'description' => [
         [
-          'value' => 'Feed Resource Test 1'
-        ]
+          'value' => 'Feed Resource Test 1',
+        ],
       ],
       'image' => [
         [
-          'value' => 'http://example.com/feed_logo'
-        ]
+          'value' => 'http://example.com/feed_logo',
+        ],
       ],
       'hash' => [
         [
-          'value' => 'abcdefg'
-        ]
+          'value' => 'abcdefg',
+        ],
       ],
       'etag' => [
         [
-          'value' => 'hijklmn'
-        ]
+          'value' => 'hijklmn',
+        ],
       ],
       'modified' => [
         $this->formatExpectedTimestampItemValues(123456789),
@@ -148,23 +149,23 @@ abstract class FeedResourceTestBase extends EntityResourceTestBase {
     return [
       'title' => [
         [
-          'value' => 'Feed Resource Post Test'
-        ]
+          'value' => 'Feed Resource Post Test',
+        ],
       ],
       'url' => [
         [
-          'value' => 'http://example.com/feed'
-        ]
+          'value' => 'http://example.com/feed',
+        ],
       ],
       'refresh' => [
         [
-          'value' => 900
-        ]
+          'value' => 900,
+        ],
       ],
       'description' => [
         [
-          'value' => 'Feed Resource Post Test Description'
-        ]
+          'value' => 'Feed Resource Post Test Description',
+        ],
       ],
     ];
   }
@@ -180,10 +181,12 @@ abstract class FeedResourceTestBase extends EntityResourceTestBase {
     switch ($method) {
       case 'GET':
         return "The 'access news feeds' permission is required.";
+
       case 'POST':
       case 'PATCH':
       case 'DELETE':
         return "The 'administer news feeds' permission is required.";
+
       default:
         return parent::getExpectedUnauthorizedAccessMessage($method);
     }

@@ -5,7 +5,6 @@ namespace Drupal\Tests\migrate_drupal\Kernel\Plugin\migrate\source;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Language\LanguageInterface;
-use Drupal\field\Tests\EntityReference\EntityReferenceTestTrait;
 use Drupal\file\Entity\File;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\language\Entity\ConfigurableLanguage;
@@ -16,7 +15,8 @@ use Drupal\node\Entity\Node;
 use Drupal\node\Entity\NodeType;
 use Drupal\taxonomy\Entity\Term;
 use Drupal\taxonomy\Entity\Vocabulary;
-use Drupal\Tests\media\Functional\MediaFunctionalTestCreateMediaTypeTrait;
+use Drupal\Tests\field\Traits\EntityReferenceTestTrait;
+use Drupal\Tests\media\Traits\MediaTypeCreationTrait;
 use Drupal\user\Entity\User;
 
 /**
@@ -27,7 +27,7 @@ use Drupal\user\Entity\User;
 class ContentEntityTest extends KernelTestBase {
 
   use EntityReferenceTestTrait;
-  use MediaFunctionalTestCreateMediaTypeTrait;
+  use MediaTypeCreationTrait;
 
   /**
    * {@inheritdoc}
@@ -188,7 +188,8 @@ class ContentEntityTest extends KernelTestBase {
     $plugin_definition = [
       'entity_type' => '',
     ];
-    $this->setExpectedException(InvalidPluginDefinitionException::class, 'Missing required "entity_type" definition.');
+    $this->expectException(InvalidPluginDefinitionException::class);
+    $this->expectExceptionMessage('Missing required "entity_type" definition.');
     ContentEntity::create($this->container, $configuration, 'content_entity', $plugin_definition, $migration);
   }
 
@@ -201,7 +202,8 @@ class ContentEntityTest extends KernelTestBase {
     $plugin_definition = [
       'entity_type' => 'node_type',
     ];
-    $this->setExpectedException(InvalidPluginDefinitionException::class, 'The entity type (node_type) is not supported. The "content_entity" source plugin only supports content entities.');
+    $this->expectException(InvalidPluginDefinitionException::class);
+    $this->expectExceptionMessage('The entity type (node_type) is not supported. The "content_entity" source plugin only supports content entities.');
     ContentEntity::create($this->container, $configuration, 'content_entity:node_type', $plugin_definition, $migration);
   }
 
@@ -216,7 +218,8 @@ class ContentEntityTest extends KernelTestBase {
     $plugin_definition = [
       'entity_type' => 'user',
     ];
-    $this->setExpectedException(\InvalidArgumentException::class, 'A bundle was provided but the entity type (user) is not bundleable');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('A bundle was provided but the entity type (user) is not bundleable');
     ContentEntity::create($this->container, $configuration, 'content_entity:user', $plugin_definition, $migration);
   }
 
@@ -231,7 +234,8 @@ class ContentEntityTest extends KernelTestBase {
     $plugin_definition = [
       'entity_type' => 'node',
     ];
-    $this->setExpectedException(\InvalidArgumentException::class, 'The provided bundle (foo) is not valid for the (node) entity type.');
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage('The provided bundle (foo) is not valid for the (node) entity type.');
     ContentEntity::create($this->container, $configuration, 'content_entity:node', $plugin_definition, $migration);
   }
 
@@ -244,7 +248,7 @@ class ContentEntityTest extends KernelTestBase {
     ];
     $migration = $this->migrationPluginManager->createStubMigration($this->migrationDefinition('content_entity:user'));
     $user_source = $this->sourcePluginManager->createInstance('content_entity:user', $configuration, $migration);
-    $this->assertSame('user entities', $user_source->__toString());
+    $this->assertSame('users', $user_source->__toString());
     $this->assertEquals(1, $user_source->count());
     $ids = $user_source->getIds();
     $this->assertArrayHasKey('langcode', $ids);
@@ -279,7 +283,7 @@ class ContentEntityTest extends KernelTestBase {
     ];
     $migration = $this->migrationPluginManager->createStubMigration($this->migrationDefinition('content_entity:file'));
     $file_source = $this->sourcePluginManager->createInstance('content_entity:file', $configuration, $migration);
-    $this->assertSame('file entities', $file_source->__toString());
+    $this->assertSame('files', $file_source->__toString());
     $this->assertEquals(1, $file_source->count());
     $ids = $file_source->getIds();
     $this->assertArrayHasKey('fid', $ids);
@@ -317,6 +321,7 @@ class ContentEntityTest extends KernelTestBase {
     $values = $node_source->current()->getSource();
     $this->assertEquals($this->bundle, $values['type'][0]['target_id']);
     $this->assertEquals(1, $values['nid']);
+    $this->assertEquals(1, $values['vid']);
     $this->assertEquals('en', $values['langcode']);
     $this->assertEquals(1, $values['status'][0]['value']);
     $this->assertEquals('Apples', $values['title'][0]['value']);
@@ -326,6 +331,7 @@ class ContentEntityTest extends KernelTestBase {
     $values = $node_source->current()->getSource();
     $this->assertEquals($this->bundle, $values['type'][0]['target_id']);
     $this->assertEquals(1, $values['nid']);
+    $this->assertEquals(1, $values['vid']);
     $this->assertEquals('fr', $values['langcode']);
     $this->assertEquals(1, $values['status'][0]['value']);
     $this->assertEquals('Pommes', $values['title'][0]['value']);
@@ -339,12 +345,11 @@ class ContentEntityTest extends KernelTestBase {
   public function testMediaSource() {
     $values = [
       'id' => 'image',
-      'bundle' => 'image',
       'label' => 'Image',
       'source' => 'test',
       'new_revision' => FALSE,
     ];
-    $media_type = $this->createMediaType($values);
+    $media_type = $this->createMediaType('test', $values);
     $media = Media::create([
       'name' => 'Foo media',
       'uid' => $this->user->id(),
@@ -366,13 +371,15 @@ class ContentEntityTest extends KernelTestBase {
     $fields = $media_source->fields();
     $this->assertArrayHasKey('bundle', $fields);
     $this->assertArrayHasKey('mid', $fields);
+    $this->assertArrayHasKey('vid', $fields);
     $this->assertArrayHasKey('name', $fields);
     $this->assertArrayHasKey('status', $fields);
     $media_source->rewind();
     $values = $media_source->current()->getSource();
     $this->assertEquals(1, $values['mid']);
+    $this->assertEquals(1, $values['vid']);
     $this->assertEquals('Foo media', $values['name'][0]['value']);
-    $this->assertEquals('Foo media', $values['thumbnail'][0]['title']);
+    $this->assertNull($values['thumbnail'][0]['title']);
     $this->assertEquals(1, $values['uid'][0]['target_id']);
     $this->assertEquals('image', $values['bundle'][0]['target_id']);
   }
@@ -395,13 +402,15 @@ class ContentEntityTest extends KernelTestBase {
     ];
     $migration = $this->migrationPluginManager->createStubMigration($this->migrationDefinition('content_entity:taxonomy_term'));
     $term_source = $this->sourcePluginManager->createInstance('content_entity:taxonomy_term', $configuration, $migration);
-    $this->assertSame('taxonomy term entities', $term_source->__toString());
+    $this->assertSame('taxonomy terms', $term_source->__toString());
     $this->assertEquals(2, $term_source->count());
     $ids = $term_source->getIds();
     $this->assertArrayHasKey('langcode', $ids);
+    $this->assertArrayHasKey('revision_id', $ids);
     $this->assertArrayHasKey('tid', $ids);
     $fields = $term_source->fields();
     $this->assertArrayHasKey('vid', $fields);
+    $this->assertArrayHasKey('revision_id', $fields);
     $this->assertArrayHasKey('tid', $fields);
     $this->assertArrayHasKey('name', $fields);
     $term_source->rewind();

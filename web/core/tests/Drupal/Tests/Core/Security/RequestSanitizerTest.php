@@ -61,7 +61,7 @@ class RequestSanitizerTest extends UnitTestCase {
 
     $request = RequestSanitizer::sanitize($request, $whitelist, is_null($expected_errors) ? FALSE : TRUE);
 
-    // Normalise the expected data.
+    // Normalize the expected data.
     $expected += ['cookies' => [], 'query' => [], 'request' => []];
     $expected_query_string = http_build_query($expected['query']);
 
@@ -335,7 +335,6 @@ class RequestSanitizerTest extends UnitTestCase {
     $data[] = ['//example.com/test'];
     // External URL is not allowed.
     $data[] = ['http://example.com'];
-    $data[] = ['http://example.com//?destination=http://www.evilsite.com%5C@http://www.drupalsite.com'];
     return $data;
   }
 

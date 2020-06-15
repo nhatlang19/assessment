@@ -27,13 +27,13 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
    * {@inheritdoc}
    */
   protected static $patchProtectedFieldNames = [
-    'revision_timestamp',
-    'revision_uid',
-    'created',
-    'changed',
-    'promote',
-    'sticky',
-    'path',
+    'revision_timestamp' => NULL,
+    'revision_uid' => NULL,
+    'created' => "The 'administer nodes' permission is required.",
+    'changed' => NULL,
+    'promote' => "The 'administer nodes' permission is required.",
+    'sticky' => "The 'administer nodes' permission is required.",
+    'path' => "The following permissions are required: 'create url aliases' OR 'administer url aliases'.",
   ];
 
   /**
@@ -49,9 +49,11 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
       case 'GET':
         $this->grantPermissionsToTestedRole(['access content']);
         break;
+
       case 'POST':
         $this->grantPermissionsToTestedRole(['access content', 'create camelids content']);
         break;
+
       case 'PATCH':
         // Do not grant the 'create url aliases' permission to test the case
         // when the path field is protected/not accessible, see
@@ -59,6 +61,7 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
         // for a positive test.
         $this->grantPermissionsToTestedRole(['access content', 'edit any camelids content']);
         break;
+
       case 'DELETE':
         $this->grantPermissionsToTestedRole(['access content', 'delete any camelids content']);
         break;
@@ -81,7 +84,7 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
     $node = Node::create(['type' => 'camelids']);
     $node->setTitle('Llama')
       ->setOwnerId(static::$auth ? $this->account->id() : 0)
-      ->setPublished(TRUE)
+      ->setPublished()
       ->setCreatedTime(123456789)
       ->setChangedTime(123456789)
       ->setRevisionCreationTime(123456789)
@@ -249,7 +252,7 @@ abstract class NodeResourceTestBase extends EntityResourceTestBase {
     // unchanged.
     $response = $this->request('PATCH', $url, $request_options);
     $this->assertSame('/llama', $this->entityStorage->loadUnchanged($this->entity->id())->get('path')->alias);
-    $this->assertResourceErrorResponse(403, "Access denied on updating field 'path'.", $response);
+    $this->assertResourceErrorResponse(403, "Access denied on updating field 'path'. " . static::$patchProtectedFieldNames['path'], $response);
 
     // Grant permission to create URL aliases.
     $this->grantPermissionsToTestedRole(['create url aliases']);

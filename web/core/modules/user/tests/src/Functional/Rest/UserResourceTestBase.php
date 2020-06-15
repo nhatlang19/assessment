@@ -26,7 +26,7 @@ abstract class UserResourceTestBase extends EntityResourceTestBase {
    * {@inheritdoc}
    */
   protected static $patchProtectedFieldNames = [
-    'changed',
+    'changed' => NULL,
   ];
 
   /**
@@ -57,6 +57,7 @@ abstract class UserResourceTestBase extends EntityResourceTestBase {
       case 'GET':
         $this->grantPermissionsToTestedRole(['access user profiles']);
         break;
+
       case 'POST':
       case 'PATCH':
       case 'DELETE':
@@ -294,7 +295,7 @@ abstract class UserResourceTestBase extends EntityResourceTestBase {
     $response = $this->request('PATCH', $url, $request_options);
     // Ensure the email address has not changed.
     $this->assertEquals('admin@example.com', $this->entityStorage->loadUnchanged(1)->getEmail());
-    $this->assertResourceErrorResponse(403, "Access denied on updating field 'uid'.", $response);
+    $this->assertResourceErrorResponse(403, "Access denied on updating field 'uid'. The entity ID cannot be changed.", $response);
   }
 
   /**
@@ -308,10 +309,13 @@ abstract class UserResourceTestBase extends EntityResourceTestBase {
     switch ($method) {
       case 'GET':
         return "The 'access user profiles' permission is required and the user must be active.";
+
       case 'PATCH':
         return "Users can only update their own account, unless they have the 'administer users' permission.";
+
       case 'DELETE':
         return "The 'cancel account' permission is required.";
+
       default:
         return parent::getExpectedUnauthorizedAccessMessage($method);
     }
@@ -324,6 +328,17 @@ abstract class UserResourceTestBase extends EntityResourceTestBase {
     // @see \Drupal\user\UserAccessControlHandler::checkAccess()
     return parent::getExpectedUnauthorizedEntityAccessCacheability($is_authenticated)
       ->addCacheTags(['user:3']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getExpectedCacheContexts() {
+    return [
+      'url.site',
+      // Due to the 'mail' field's access varying by user.
+      'user',
+    ];
   }
 
 }

@@ -25,6 +25,11 @@ class QuickEditIntegrationTest extends SettingsTrayTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     $user = $this->createUser([
@@ -134,6 +139,8 @@ class QuickEditIntegrationTest extends SettingsTrayTestBase {
     $this->placeBlock('block_content:' . $block_content->uuid(), ['id' => 'custom']);
     $this->drupalGet('user');
     $page = $this->getSession()->getPage();
+    $this->toggleContextualTriggerVisibility('#block-custom');
+    $page->find('css', '#block-custom .contextual button')->press();
     $links = $page->findAll('css', "#block-custom .contextual-links li a");
     $link_labels = [];
     /** @var \Behat\Mink\Element\NodeElement $link */
@@ -143,7 +150,8 @@ class QuickEditIntegrationTest extends SettingsTrayTestBase {
     $href = array_search('Quick edit', $link_labels);
     $this->assertEquals('', $href);
     $href = array_search('Quick edit settings', $link_labels);
-    $this->assertTrue(strstr($href, '/admin/structure/block/manage/custom/settings-tray?destination=user/2') !== FALSE);
+    $destination = (string) $this->loggedInUser->toUrl()->toString();
+    $this->assertTrue(strstr($href, "/admin/structure/block/manage/custom/settings-tray?destination=$destination") !== FALSE);
   }
 
   /**

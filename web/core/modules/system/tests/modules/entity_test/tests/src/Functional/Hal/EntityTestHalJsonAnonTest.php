@@ -25,6 +25,11 @@ class EntityTestHalJsonAnonTest extends EntityTestResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $format = 'hal_json';
 
   /**
@@ -68,7 +73,7 @@ class EntityTestHalJsonAnonTest extends EntityTestResourceTestBase {
               ],
             ],
             'uuid' => [
-              ['value' => $author->uuid()]
+              ['value' => $author->uuid()],
             ],
             'lang' => 'en',
           ],

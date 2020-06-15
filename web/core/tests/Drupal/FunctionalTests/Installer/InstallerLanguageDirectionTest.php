@@ -10,6 +10,11 @@ namespace Drupal\FunctionalTests\Installer;
 class InstallerLanguageDirectionTest extends InstallerTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Overrides the language code the installer should use.
    *
    * @var string
@@ -21,8 +26,8 @@ class InstallerLanguageDirectionTest extends InstallerTestBase {
    */
   protected function setUpLanguage() {
     // Place a custom local translation in the translations directory.
-    mkdir(\Drupal::root() . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
-    file_put_contents(\Drupal::root() . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.ar.po', "msgid \"\"\nmsgstr \"\"\nmsgid \"Save and continue\"\nmsgstr \"Save and continue Arabic\"");
+    mkdir($this->root . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
+    file_put_contents($this->root . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.ar.po', "msgid \"\"\nmsgstr \"\"\nmsgid \"Save and continue\"\nmsgstr \"Save and continue Arabic\"");
 
     parent::setUpLanguage();
     // After selecting a different language than English, all following screens
@@ -41,7 +46,7 @@ class InstallerLanguageDirectionTest extends InstallerTestBase {
    */
   public function testInstalled() {
     $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
   }
 
 }

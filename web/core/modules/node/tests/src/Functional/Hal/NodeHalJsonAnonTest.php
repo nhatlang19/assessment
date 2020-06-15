@@ -23,12 +23,30 @@ class NodeHalJsonAnonTest extends NodeResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $format = 'hal_json';
 
   /**
    * {@inheritdoc}
    */
   protected static $mimeType = 'application/hal+json';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected static $patchProtectedFieldNames = [
+    'revision_timestamp' => NULL,
+    'created' => "The 'administer nodes' permission is required.",
+    'changed' => NULL,
+    'promote' => "The 'administer nodes' permission is required.",
+    'sticky' => "The 'administer nodes' permission is required.",
+    'path' => "The following permissions are required: 'create url aliases' OR 'administer url aliases'.",
+    'revision_uid' => NULL,
+  ];
 
   /**
    * {@inheritdoc}
@@ -71,7 +89,7 @@ class NodeHalJsonAnonTest extends NodeResourceTestBase {
               ],
             ],
             'uuid' => [
-              ['value' => $author->uuid()]
+              ['value' => $author->uuid()],
             ],
           ],
         ],
@@ -86,7 +104,7 @@ class NodeHalJsonAnonTest extends NodeResourceTestBase {
               ],
             ],
             'uuid' => [
-              ['value' => $author->uuid()]
+              ['value' => $author->uuid()],
             ],
             'lang' => 'en',
           ],

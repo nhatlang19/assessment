@@ -13,8 +13,13 @@ class CommentHalJsonAnonTest extends CommentHalJsonTestBase {
 
   /**
    * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
    *
-   * Anononymous users cannot edit their own comments.
+   * Anonymous users cannot edit their own comments.
    *
    * @see \Drupal\comment\CommentAccessControlHandler::checkAccess
    *
@@ -25,11 +30,11 @@ class CommentHalJsonAnonTest extends CommentHalJsonTestBase {
    * @see ::setUpAuthorization
    */
   protected static $patchProtectedFieldNames = [
-    'entity_id',
-    'changed',
-    'thread',
-    'entity_type',
-    'field_name',
+    'changed' => NULL,
+    'thread' => NULL,
+    'entity_type' => NULL,
+    'field_name' => NULL,
+    'entity_id' => NULL,
   ];
 
 }

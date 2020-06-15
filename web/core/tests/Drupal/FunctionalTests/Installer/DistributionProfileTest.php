@@ -3,7 +3,6 @@
 namespace Drupal\FunctionalTests\Installer;
 
 use Drupal\Core\Serialization\Yaml;
-use Drupal\Core\Site\Settings;
 
 /**
  * Tests distribution profile support.
@@ -19,16 +18,22 @@ class DistributionProfileTest extends InstallerTestBase {
    */
   protected $info;
 
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
   protected function prepareEnvironment() {
     parent::prepareEnvironment();
     $this->info = [
       'type' => 'profile',
-      'core' => \Drupal::CORE_COMPATIBILITY,
+      'core_version_requirement' => '*',
       'name' => 'Distribution profile',
       'distribution' => [
         'name' => 'My Distribution',
         'install' => [
           'theme' => 'bartik',
+          'finish_url' => '/myrootuser',
         ],
       ],
     ];
@@ -36,6 +41,7 @@ class DistributionProfileTest extends InstallerTestBase {
     $path = $this->siteDirectory . '/profiles/mydistro';
     mkdir($path, 0777, TRUE);
     file_put_contents("$path/mydistro.info.yml", Yaml::encode($this->info));
+    file_put_contents("$path/mydistro.install", "<?php function mydistro_install() {\Drupal::entityTypeManager()->getStorage('path_alias')->create(['path' => '/user/1', 'alias' => '/myrootuser'])->save();}");
   }
 
   /**
@@ -65,14 +71,13 @@ class DistributionProfileTest extends InstallerTestBase {
    * Confirms that the installation succeeded.
    */
   public function testInstalled() {
-    $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertUrl('myrootuser');
+    $this->assertSession()->statusCodeEquals(200);
     // Confirm that we are logged-in after installation.
-    $this->assertText($this->rootUser->getUsername());
+    $this->assertText($this->rootUser->getAccountName());
 
     // Confirm that Drupal recognizes this distribution as the current profile.
     $this->assertEqual(\Drupal::installProfile(), 'mydistro');
-    $this->assertEqual(Settings::get('install_profile'), 'mydistro', 'The install profile has been written to settings.php.');
     $this->assertEqual($this->config('core.extension')->get('profile'), 'mydistro', 'The install profile has been written to core.extension configuration.');
   }
 

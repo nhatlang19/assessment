@@ -105,6 +105,16 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
     $this->assertEntity('node.field_date_without_time', 'datetime', TRUE, 1);
     $this->assertEntity('node.field_datetime_without_time', 'datetime', TRUE, 1);
 
+    // Tests that fields created by the Title module are not migrated.
+    $title_field = FieldStorageConfig::load('node.title_field');
+    $this->assertNull($title_field);
+    $subject_field = FieldStorageConfig::load('comment.subject_field');
+    $this->assertNull($subject_field);
+    $name_field = FieldStorageConfig::load('taxonomy_term.name_field');
+    $this->assertNull($name_field);
+    $description_field = FieldStorageConfig::load('taxonomy_term.description_field');
+    $this->assertNull($description_field);
+
     // Assert that the taxonomy term reference fields are referencing the
     // correct entity type.
     $field = FieldStorageConfig::load('node.field_term_reference');
@@ -163,10 +173,9 @@ class MigrateFieldTest extends MigrateDrupal7TestBase {
     // For each text field bases that were skipped, there should be a log
     // message with the required steps to fix this.
     $migration = $this->getMigration('d7_field');
-    $messages = $migration->getIdMap()->getMessageIterator()->fetchAll();
     $errors = array_map(function ($message) {
       return $message->message;
-    }, $messages);
+    }, iterator_to_array($migration->getIdMap()->getMessages()));
     sort($errors);
     $this->assertCount(4, $errors);
     $this->assertEquals($errors[0], 'Can\'t migrate source field field_text_long_plain_filtered configured with both plain text and filtered text processing. See https://www.drupal.org/docs/8/upgrade/known-issues-when-upgrading-from-drupal-6-or-7-to-drupal-8#plain-text');

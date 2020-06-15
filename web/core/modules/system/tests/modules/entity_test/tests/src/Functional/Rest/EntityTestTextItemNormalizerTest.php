@@ -22,6 +22,11 @@ class EntityTestTextItemNormalizerTest extends EntityTestResourceTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected static $format = 'json';
 
   /**
@@ -123,7 +128,7 @@ class EntityTestTextItemNormalizerTest extends EntityTestResourceTestBase {
       'foo:bar',
       'foo:baz',
       // The cache tags set by the filter_test_cache_merge filter.
-      'merge:tag'
+      'merge:tag',
     ], parent::getExpectedCacheTags());
   }
 
@@ -149,7 +154,7 @@ class EntityTestTextItemNormalizerTest extends EntityTestResourceTestBase {
    */
   public function testGetWithFormat($text_format_id, array $expected_cache_tags) {
     FilterFormat::create([
-      'name' => 'Pablo Piccasso',
+      'name' => 'Pablo Picasso',
       'format' => 'pablo',
       'langcode' => 'es',
       'filters' => [],

@@ -9,7 +9,6 @@ namespace Drupal\Tests\views\Kernel;
  */
 use Drupal\views\Plugin\views\filter\Standard;
 use Drupal\views\Views;
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Component\Render\FormattableMarkup;
 
 class ModuleTest extends ViewsKernelTestBase {
@@ -29,7 +28,7 @@ class ModuleTest extends ViewsKernelTestBase {
   public static $modules = ['field', 'user', 'block'];
 
   /**
-   * Stores the last triggered error, for example via debug().
+   * Stores the last triggered error.
    *
    * @var string
    *
@@ -38,9 +37,9 @@ class ModuleTest extends ViewsKernelTestBase {
   protected $lastErrorMessage;
 
   /**
-   * Tests the views_get_handler method.
+   * Tests the  ViewsHandlerManager::getHandler() method.
    *
-   * @see views_get_handler()
+   * @see \Drupal\views\Plugin\ViewsHandlerManager::getHandler()
    */
   public function testViewsGetHandler() {
     $types = ['field', 'area', 'filter'];
@@ -77,7 +76,7 @@ class ModuleTest extends ViewsKernelTestBase {
       'field' => 'job',
     ];
     $handler = $this->container->get('plugin.manager.views.filter')->getHandler($item, 'standard');
-    $this->assertTrue($handler instanceof Standard);
+    $this->assertInstanceOf(Standard::class, $handler);
 
     // @todo Reinstate these tests when the debug() in views_get_handler() is
     //   restored.
@@ -90,7 +89,7 @@ class ModuleTest extends ViewsKernelTestBase {
       'field' => 'field_invalid',
     ];
     $this->container->get('plugin.manager.views.field')->getHandler($item);
-    $this->assertTrue(strpos($this->lastErrorMessage, format_string("Missing handler: @table @field @type", ['@table' => 'views_test_data', '@field' => 'field_invalid', '@type' => 'field'])) !== FALSE, 'An invalid field name throws a debug message.');
+    $this->assertStringContainsString(new FormattableMarkup("Missing handler: @table @field @type", ['@table' => 'views_test_data', '@field' => 'field_invalid', '@type' => 'field']), $this->lastErrorMessage, 'An invalid field name throws a debug message.');
     unset($this->lastErrorMessage);
 
     $item = [
@@ -98,7 +97,7 @@ class ModuleTest extends ViewsKernelTestBase {
       'field' => 'id',
     ];
     $this->container->get('plugin.manager.views.filter')->getHandler($item);
-    $this->assertEqual(strpos($this->lastErrorMessage, format_string("Missing handler: @table @field @type", ['@table' => 'table_invalid', '@field' => 'id', '@type' => 'filter'])) !== FALSE, 'An invalid table name throws a debug message.');
+    $this->assertStringContainsString(new FormattableMarkup("Missing handler: @table @field @type", ['@table' => 'table_invalid', '@field' => 'id', '@type' => 'filter']), $this->lastErrorMessage, 'An invalid table name throws a debug message.');
     unset($this->lastErrorMessage);
 
     $item = [
@@ -106,7 +105,7 @@ class ModuleTest extends ViewsKernelTestBase {
       'field' => 'id',
     ];
     $this->container->get('plugin.manager.views.filter')->getHandler($item);
-    $this->assertEqual(strpos($this->lastErrorMessage, format_string("Missing handler: @table @field @type", ['@table' => 'table_invalid', '@field' => 'id', '@type' => 'filter'])) !== FALSE, 'An invalid table name throws a debug message.');
+    $this->assertStringContainsString(new FormattableMarkup("Missing handler: @table @field @type", ['@table' => 'table_invalid', '@field' => 'id', '@type' => 'filter']), $this->lastErrorMessage, 'An invalid table name throws a debug message.');
     unset($this->lastErrorMessage);
 
     restore_error_handler();
@@ -140,8 +139,9 @@ class ModuleTest extends ViewsKernelTestBase {
    */
   public function testLoadFunctions() {
     $this->enableModules(['text', 'node']);
+    $this->installEntitySchema('node');
     $this->installConfig(['node']);
-    $storage = $this->container->get('entity.manager')->getStorage('view');
+    $storage = $this->container->get('entity_type.manager')->getStorage('view');
 
     // Test views_view_is_enabled/disabled.
     $archive = $storage->load('archive');
@@ -191,9 +191,9 @@ class ModuleTest extends ViewsKernelTestBase {
     $this->assertIdentical(array_keys($all_views_sorted), array_keys(Views::getViewsAsOptions(TRUE, 'all', NULL, FALSE, TRUE)), 'All view id keys returned in expected sort order');
 
     // Test $exclude_view parameter.
-    $this->assertFalse(array_key_exists('archive', Views::getViewsAsOptions(TRUE, 'all', 'archive')), 'View excluded from options based on name');
-    $this->assertFalse(array_key_exists('archive:default', Views::getViewsAsOptions(FALSE, 'all', 'archive:default')), 'View display excluded from options based on name');
-    $this->assertFalse(array_key_exists('archive', Views::getViewsAsOptions(TRUE, 'all', $archive->getExecutable())), 'View excluded from options based on object');
+    $this->assertArrayNotHasKey('archive', Views::getViewsAsOptions(TRUE, 'all', 'archive'));
+    $this->assertArrayNotHasKey('archive:default', Views::getViewsAsOptions(FALSE, 'all', 'archive:default'));
+    $this->assertArrayNotHasKey('archive', Views::getViewsAsOptions(TRUE, 'all', $archive->getExecutable()));
 
     // Test the $opt_group parameter.
     $expected_opt_groups = [];
@@ -256,13 +256,13 @@ class ModuleTest extends ViewsKernelTestBase {
       list($plugin_type, $plugin_id) = explode(':', $key);
       $plugin_def = $this->container->get("plugin.manager.views.$plugin_type")->getDefinition($plugin_id);
 
-      $this->assertTrue(isset($plugin_list[$key]), SafeMarkup::format('The expected @key plugin list key was found.', ['@key' => $key]));
+      $this->assertTrue(isset($plugin_list[$key]), new FormattableMarkup('The expected @key plugin list key was found.', ['@key' => $key]));
       $plugin_details = $plugin_list[$key];
 
       $this->assertEqual($plugin_details['type'], $plugin_type, 'The expected plugin type was found.');
       $this->assertEqual($plugin_details['title'], $plugin_def['title'], 'The expected plugin title was found.');
       $this->assertEqual($plugin_details['provider'], $plugin_def['provider'], 'The expected plugin provider was found.');
-      $this->assertTrue(in_array('test_view', $plugin_details['views']), 'The test_view View was found in the list of views using this plugin.');
+      $this->assertContains('test_view', $plugin_details['views'], 'The test_view View was found in the list of views using this plugin.');
     }
   }
 
@@ -275,23 +275,23 @@ class ModuleTest extends ViewsKernelTestBase {
 
     $result = views_embed_view('test_argument');
     $renderer->renderPlain($result);
-    $this->assertEqual(count($result['view_build']['#view']->result), 5);
+    $this->assertCount(5, $result['view_build']['#view']->result);
 
     $result = views_embed_view('test_argument', 'default', 1);
     $renderer->renderPlain($result);
-    $this->assertEqual(count($result['view_build']['#view']->result), 1);
+    $this->assertCount(1, $result['view_build']['#view']->result);
 
     $result = views_embed_view('test_argument', 'default', '1,2');
     $renderer->renderPlain($result);
-    $this->assertEqual(count($result['view_build']['#view']->result), 2);
+    $this->assertCount(2, $result['view_build']['#view']->result);
 
     $result = views_embed_view('test_argument', 'default', '1,2', 'John');
     $renderer->renderPlain($result);
-    $this->assertEqual(count($result['view_build']['#view']->result), 1);
+    $this->assertCount(1, $result['view_build']['#view']->result);
 
     $result = views_embed_view('test_argument', 'default', '1,2', 'John,George');
     $renderer->renderPlain($result);
-    $this->assertEqual(count($result['view_build']['#view']->result), 2);
+    $this->assertCount(2, $result['view_build']['#view']->result);
   }
 
   /**
@@ -300,39 +300,39 @@ class ModuleTest extends ViewsKernelTestBase {
   public function testViewsPreview() {
     $view = Views::getView('test_argument');
     $result = $view->preview('default');
-    $this->assertEqual(count($result['#view']->result), 5);
+    $this->assertCount(5, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['0' => 1]);
-    $this->assertEqual(count($result['#view']->result), 1);
+    $this->assertCount(1, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['3' => 1]);
-    $this->assertEqual(count($result['#view']->result), 1);
+    $this->assertCount(1, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['0' => '1,2']);
-    $this->assertEqual(count($result['#view']->result), 2);
+    $this->assertCount(2, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['3' => '1,2']);
-    $this->assertEqual(count($result['#view']->result), 2);
+    $this->assertCount(2, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['0' => '1,2', '1' => 'John']);
-    $this->assertEqual(count($result['#view']->result), 1);
+    $this->assertCount(1, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['3' => '1,2', '4' => 'John']);
-    $this->assertEqual(count($result['#view']->result), 1);
+    $this->assertCount(1, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['0' => '1,2', '1' => 'John,George']);
-    $this->assertEqual(count($result['#view']->result), 2);
+    $this->assertCount(2, $result['#view']->result);
 
     $view = Views::getView('test_argument');
     $result = $view->preview('default', ['3' => '1,2', '4' => 'John,George']);
-    $this->assertEqual(count($result['#view']->result), 2);
+    $this->assertCount(2, $result['#view']->result);
   }
 
   /**

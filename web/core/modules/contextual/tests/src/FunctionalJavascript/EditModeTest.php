@@ -2,14 +2,14 @@
 
 namespace Drupal\Tests\contextual\FunctionalJavascript;
 
-use Drupal\FunctionalJavascriptTests\JavascriptTestBase;
+use Drupal\FunctionalJavascriptTests\WebDriverTestBase;
 
 /**
  * Tests edit mode.
  *
  * @group contextual
  */
-class EditModeTest extends JavascriptTestBase {
+class EditModeTest extends WebDriverTestBase {
 
   /**
    * CSS selector for Drupal's announce element.
@@ -32,6 +32,11 @@ class EditModeTest extends JavascriptTestBase {
   /**
    * {@inheritdoc}
    */
+  protected $defaultTheme = 'stark';
+
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
 
@@ -46,7 +51,7 @@ class EditModeTest extends JavascriptTestBase {
   /**
    * Tests enabling and disabling edit mode.
    */
-  public function testEditModeEnableDisalbe() {
+  public function testEditModeEnableDisable() {
     $web_assert = $this->assertSession();
     $page = $this->getSession()->getPage();
     // Get the page twice to ensure edit mode remains enabled after a new page

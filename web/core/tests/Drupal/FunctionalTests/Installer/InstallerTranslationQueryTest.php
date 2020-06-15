@@ -12,6 +12,11 @@ namespace Drupal\FunctionalTests\Installer;
 class InstallerTranslationQueryTest extends InstallerTestBase {
 
   /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
+
+  /**
    * Overrides the language code in which to install Drupal.
    *
    * @var string
@@ -23,8 +28,8 @@ class InstallerTranslationQueryTest extends InstallerTestBase {
    */
   protected function visitInstaller() {
     // Place a custom local translation in the translations directory.
-    mkdir(\Drupal::root() . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
-    file_put_contents(\Drupal::root() . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.de.po', $this->getPo('de'));
+    mkdir($this->root . '/' . $this->siteDirectory . '/files/translations', 0777, TRUE);
+    file_put_contents($this->root . '/' . $this->siteDirectory . '/files/translations/drupal-8.0.0.de.po', $this->getPo('de'));
 
     // The unrouted URL assembler does not exist at this point, so we build the
     // URL ourselves.
@@ -54,7 +59,7 @@ class InstallerTranslationQueryTest extends InstallerTestBase {
    */
   public function testInstaller() {
     $this->assertUrl('user/1');
-    $this->assertResponse(200);
+    $this->assertSession()->statusCodeEquals(200);
 
     // Verify German was configured but not English.
     $this->drupalGet('admin/config/regional/language');

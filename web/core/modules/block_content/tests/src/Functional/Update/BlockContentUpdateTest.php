@@ -9,6 +9,7 @@ use Drupal\FunctionalTests\Update\UpdatePathTestBase;
  * Tests update functions for the Block Content module.
  *
  * @group Update
+ * @group legacy
  */
 class BlockContentUpdateTest extends UpdatePathTestBase {
 
@@ -33,8 +34,8 @@ class BlockContentUpdateTest extends UpdatePathTestBase {
 
     $post_revision_created = $entity_definition_update_manager->getFieldStorageDefinition('revision_created', 'block_content');
     $post_revision_user = $entity_definition_update_manager->getFieldStorageDefinition('revision_user', 'block_content');
-    $this->assertTrue($post_revision_created instanceof BaseFieldDefinition, "Revision created field found");
-    $this->assertTrue($post_revision_user instanceof BaseFieldDefinition, "Revision user field found");
+    $this->assertInstanceOf(BaseFieldDefinition::class, $post_revision_created);
+    $this->assertInstanceOf(BaseFieldDefinition::class, $post_revision_user);
 
     $this->assertEqual('created', $post_revision_created->getType(), "Field is type created");
     $this->assertEqual('entity_reference', $post_revision_user->getType(), "Field is type entity_reference");
