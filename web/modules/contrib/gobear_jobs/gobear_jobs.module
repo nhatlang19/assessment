@@ -1,0 +1,9 @@
+<?php
+
+function gobear_jobs_theme($existing, $type, $theme, $path) {
+  return [
+    'jobs_list' => [
+      'variables' => ["headers" => [],"items" => []]
+    ]
+  ];
+}

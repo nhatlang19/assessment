@@ -1,0 +1,19 @@
+<table>
+    <thead>
+        {% for header in headers %}
+            <th>{{ header }}</th>
+        {% endfor %}
+    </thead>
+    <tbody>
+        {% for job in items %}
+        <tr>
+            <td>{{ job.title }}</td>
+            <td>{{ job.company }}</td>
+            <td>{{ job.location }}</td>
+            <td>{{ job.type }}</td>
+            <td>{{ job.created_at }}</td>
+            <td>{{ job.description }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

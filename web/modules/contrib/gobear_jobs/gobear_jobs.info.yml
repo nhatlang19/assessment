@@ -1,0 +1,13 @@
+name: GobearJobs
+type: module
+description: ''
+package: GobearJobs
+core_version_requirement: ^8.8
+dependencies:
+  - 'drupal:field'
+  - 'drupal:user'
+
+# Information added by Drupal.org packaging script on 2020-06-03
+version: '1.0'
+project: 'gobear_jobs'
+datestamp: 1591199003

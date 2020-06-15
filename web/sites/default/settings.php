@@ -262,6 +262,7 @@ $databases['default']['default'] = array(
  */
 $config_directories = array();
 $config['system.logging']['error_level'] = 'verbose';
+
 /**
  * Settings:
  *
@@ -307,7 +308,6 @@ $config['system.logging']['error_level'] = 'verbose';
  * @endcode
  */
 $settings['hash_salt'] = '9ec4a25884fa0349d1593c19dd19bfb82bb4c230';
-
 /**
  * Deployment identifier.
  *
